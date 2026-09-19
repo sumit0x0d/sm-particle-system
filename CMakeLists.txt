@@ -10,13 +10,13 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 add_subdirectory(../sm-data-structures data-structures EXCLUDE_FROM_ALL)
 
-add_subdirectory(source)
+add_library(sm-particle-system SHARED sm-particle-system.c glad.c)
 
 target_include_directories(sm-particle-system PUBLIC sm-data-structures/include include)
 target_link_libraries(sm-particle-system PUBLIC sm-dynamic-array)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
      enable_testing()
-     add_subdirectory(test)
+     add_executable(sm-particle-system-test sm-particle-system-test.c)
      target_link_libraries(sm-particle-system-test PUBLIC sm-particle-system glfw GL)
 endif()
