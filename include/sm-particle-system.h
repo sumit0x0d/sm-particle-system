@@ -29,7 +29,7 @@ struct SM_ParticleSystemParticleColor {
      float b;
 };
 
-struct SM_Particle {
+struct SM_ParticleSystemParticle {
      SM_ParticleSystemParticlePosition position;
      SM_ParticleSystemParticlePosition velocity;
      SM_ParticleSystemParticlePosition color;
