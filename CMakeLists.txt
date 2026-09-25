@@ -7,16 +7,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 # add_compile_options(-Wall -Wextra -g -Werror)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(WAYLAND REQUIRED wayland-client)
+add_subdirectory(../sm-data-structures sm-data-structures EXCLUDE_FROM_ALL)
 
-add_subdirectory(../sm-data-structures data-structures EXCLUDE_FROM_ALL)
-
-add_library(sm-particle-system SHARED sm-particle-system.c glad.c)
-
-target_include_directories(sm-particle-system PUBLIC sm-data-structures/include include)
+add_library(sm-particle-system SHARED source/sm-particle-system.c source/glad.c)
+target_include_directories(sm-particle-system PUBLIC sm-data-structures/include include ${WAYLAND_INCLUDE_DIRS})
 target_link_libraries(sm-particle-system PUBLIC sm-dynamic-array)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
      enable_testing()
-     add_executable(sm-particle-system-test sm-particle-system-test.c)
-     target_link_libraries(sm-particle-system-test PUBLIC sm-particle-system glfw GL)
+     add_executable(sm-particle-system-test test/sm-particle-system.c)
+     target_link_libraries(sm-particle-system-test PUBLIC sm-particle-system glfw GL ${WAYLAND_LIBRARIES})
 endif()
