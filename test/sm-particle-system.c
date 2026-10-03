@@ -16,7 +16,7 @@ int main(void)
           return -1;
      }
 
-     SM_ParticleSystemParticle psBody = {
+     SM_Particle_System_Particle psBody = {
           .position = {rand() % 640, rand() % 480, 0},
           .velocity = {rand() % 640, rand() % 640, 0},
           .color = {rand() % 255, rand() % 255, rand() % 255},
@@ -28,7 +28,7 @@ int main(void)
      //      .particle_count = 1000
      // };
 
-     SM_ParticleSystem *pSystem = SM_ParticleSystem_Create();
+     SM_Particle_System *pSystem = SM_Particle_System_Create();
      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
      glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
