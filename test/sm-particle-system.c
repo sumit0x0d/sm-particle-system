@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 #define GLFW_INCLUDE_NONE
 
@@ -13,6 +14,7 @@ int main(void)
    SM_Particle_System *pSystem;
    SM_Particle_System_Particle psBody;
    double previous_time;
+   size_t i;
 
    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
    if (!glfwInit()) {
@@ -37,18 +39,6 @@ int main(void)
       return -1;
    }
 
-   psBody.position.x = 320;
-   psBody.position.y = 240;
-   psBody.position.z = 0;
-   psBody.velocity.x = 20;
-   psBody.velocity.y = 15;
-   psBody.velocity.z = 0;
-   psBody.color.a = 255;
-   psBody.color.r = 255;
-   psBody.color.g = 80;
-   psBody.color.b = 20;
-   psBody.alive = SM_BOOLEAN_TRUE;
-
    pSystem = sm_particle_system_create(SM_PARTICLE_SYSTEM_RENDERER_OPENGL, 1000);
    if (!pSystem) {
       fprintf(stderr, "Failed to create particle system\n");
@@ -56,8 +46,21 @@ int main(void)
       glfwTerminate();
       return -1;
    }
+   for (i = 0; i < 100; i++) {
+      psBody.position.x = rand() % 640;
+      psBody.position.y = rand() % 480;
+      psBody.position.z = 0;
+      psBody.velocity.x = rand() % 20 - 10;
+      psBody.velocity.y = rand() % 20 - 10;
+      psBody.velocity.z = 0;
+      psBody.color.a = rand() % 256;
+      psBody.color.r = rand() % 256;
+      psBody.color.g = rand() % 256;
+      psBody.color.b = rand() % 256;
+      psBody.alive = SM_BOOLEAN_TRUE;
+      sm_particle_system_emit(pSystem, &psBody);
+   }
 
-   sm_particle_system_emit(pSystem, &psBody);
    previous_time = glfwGetTime();
 
    while (!glfwWindowShouldClose(window)) {
