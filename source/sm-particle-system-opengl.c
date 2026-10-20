@@ -6,6 +6,9 @@
 
 #include "sm-particle-system-opengl.h"
 
+#define VERTEX_SHADER_PATH "/home/sumit/Projects/sm-particle-system/source/shaders/vertex-shader.glsl"
+#define FRAGMENT_SHADER_PATH "/home/sumit/Projects/sm-particle-system/source/shaders/fragment-shader.glsl"
+
 struct SM_Particle_System_OpenGL {
    GLuint vertex_array_object;
    GLuint vertex_buffer_object;
@@ -101,13 +104,13 @@ static GLuint _create_program(void)
    GLuint program;
    GLint linked;
 
-   vertex_shader = _compile_shader(GL_VERTEX_SHADER, "vertex-shader.glsl");
+   vertex_shader = _compile_shader(GL_VERTEX_SHADER, VERTEX_SHADER_PATH);
 
    if (!vertex_shader) {
       return 0;
    }
 
-   fragment_shader = _compile_shader(GL_FRAGMENT_SHADER, "fragment-shader.glsl");
+   fragment_shader = _compile_shader(GL_FRAGMENT_SHADER, FRAGMENT_SHADER_PATH);
 
    if (!fragment_shader) {
       glDeleteShader(vertex_shader);

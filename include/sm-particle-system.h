@@ -44,7 +44,7 @@ struct SM_Particle_System_Particle {
    SM_Boolean alive;
 };
 
-SM_API SM_Particle_System *sm_particle_system_create(SM_Particle_System_Renderer_Type renderer_type, size_t particle_capacity);
+SM_API SM_Particle_System *sm_particle_system_create(SM_Particle_System_Renderer_Type renderer_type, size_t maximum_particle_count);
 
 SM_API void sm_particle_system_destroy(SM_Particle_System *this);
 

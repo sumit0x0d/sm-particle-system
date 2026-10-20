@@ -1,1 +1,0 @@
-main	test/sm-particle-system.c	/^int main(void)$/;"	f	typeref:typename:int

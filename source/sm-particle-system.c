@@ -7,17 +7,17 @@
 #include "sm-particle-system-opengl.h"
 #include "sm-particle-system-particle-array.h"
 
-union SM_Particle_System_Renderer {
+typedef union  {
    SM_Particle_System_OpenGL *opengl;
-};
+} SM_Particle_System_Renderer;
 
 struct SM_Particle_System {
    SM_Particle_System_Renderer_Type renderer_type;
-   SM_Particle_System_Particle_Array *particle;
-   union SM_Particle_System_Renderer renderer;
+   SM_Particle_System_Particle_Array particle_array;
+   SM_Particle_System_Renderer renderer;
 };
 
-SM_Particle_System *sm_particle_system_create(SM_Particle_System_Renderer_Type renderer_type, size_t particle_capacity)
+SM_Particle_System *sm_particle_system_create(SM_Particle_System_Renderer_Type renderer_type, size_t maximum_particle_count)
 {
    SM_Particle_System *this = (SM_Particle_System *)calloc(1, sizeof(*this));
 
@@ -25,9 +25,9 @@ SM_Particle_System *sm_particle_system_create(SM_Particle_System_Renderer_Type r
       return NULL;
    }
 
-   this->particle = sm_particle_system_particle_array_create(particle_capacity);
+   sm_particle_system_particle_array_create(&this->particle_array, maximum_particle_count);
 
-   if (!this->particle) {
+   if (!this->particle_array.particle) {
       free(this);
       return NULL;
    }
@@ -36,19 +36,19 @@ SM_Particle_System *sm_particle_system_create(SM_Particle_System_Renderer_Type r
       case SM_PARTICLE_SYSTEM_RENDERER_OPENGL:
          this->renderer.opengl = sm_particle_system_opengl_create();
          if (!this->renderer.opengl) {
-            sm_particle_system_particle_array_destroy(this->particle);
+            sm_particle_system_particle_array_destroy(&this->particle_array);
             free(this);
             return NULL;
          }
          break;
       case SM_PARTICLE_SYSTEM_RENDERER_VULKAN:
          fprintf(stderr, "Particle system: Vulkan renderer is not implemented\n");
-         sm_particle_system_particle_array_destroy(this->particle);
+         sm_particle_system_particle_array_destroy(&this->particle_array);
          free(this);
          return NULL;
       default:
          fprintf(stderr, "Particle system: unknown renderer type\n");
-         sm_particle_system_particle_array_destroy(this->particle);
+         sm_particle_system_particle_array_destroy(&this->particle_array);
          free(this);
          return NULL;
    }
@@ -71,7 +71,8 @@ void sm_particle_system_destroy(SM_Particle_System *this)
       case SM_PARTICLE_SYSTEM_RENDERER_VULKAN:
          break;
    }
-   sm_particle_system_particle_array_destroy(this->particle);
+
+   sm_particle_system_particle_array_destroy(&this->particle_array);
    free(this);
 }
 
@@ -81,7 +82,7 @@ size_t sm_particle_system_get_particle_count(const SM_Particle_System *this)
       return 0;
    }
 
-   return sm_particle_system_particle_array_get_size(this->particle);
+   return sm_particle_system_particle_array_get_size(&this->particle_array);
 }
 
 void sm_particle_system_emit(SM_Particle_System *this, SM_Particle_System_Particle *particle)
@@ -90,23 +91,23 @@ void sm_particle_system_emit(SM_Particle_System *this, SM_Particle_System_Partic
       return;
    }
 
-   if (!sm_particle_system_particle_array_push_back(this->particle, particle)) {
-      fprintf(stderr, "Particle system: failed to store emitted particle\n");
-   }
+   sm_particle_system_particle_array_push_back(&this->particle_array, particle);
 }
 
 void sm_particle_system_simulate(SM_Particle_System *this, SM_Float dt)
 {
-   size_t i;
    size_t particle_count;
+   size_t i;
+   SM_Particle_System_Particle *particle;
 
    if (!this) {
       return;
    }
 
-   particle_count = sm_particle_system_particle_array_get_size(this->particle);
+   particle_count = sm_particle_system_particle_array_get_size(&this->particle_array);
+
    for (i = 0; i < particle_count; i++) {
-      SM_Particle_System_Particle *particle = sm_particle_system_particle_array_get_data(this->particle, i);
+      particle = sm_particle_system_particle_array_get_data(&this->particle_array, i);
       if (!particle->alive) {
          continue;
       }
@@ -122,18 +123,11 @@ void sm_particle_system_render(SM_Particle_System *this)
    size_t particle_count;
    size_t visible_count = 0;
    float *vertex_data;
+   SM_Particle_System_Particle *particle;
 
-   if (!this) {
-      return;
-   }
+   particle_count = sm_particle_system_particle_array_get_size(&this->particle_array);
 
-   particle_count = sm_particle_system_particle_array_get_size(this->particle);
-
-   if (particle_count == 0) {
-      return;
-   }
-
-   if (particle_count > ((size_t)-1) / (6 * sizeof(*vertex_data))) {
+   if (particle_count > ((size_t) - 1) / (6 * sizeof(*vertex_data))) {
       fprintf(stderr, "Particle system: too many particles to render\n");
       return;
    }
@@ -146,8 +140,7 @@ void sm_particle_system_render(SM_Particle_System *this)
    }
 
    for (i = 0; i < particle_count; i++) {
-      const SM_Particle_System_Particle *particle =
-          sm_particle_system_particle_array_get_data(this->particle, i);
+      particle = sm_particle_system_particle_array_get_data(&this->particle_array, i);
       if (!particle->alive) {
          continue;
       }
